@@ -177,6 +177,8 @@ export default function App() {
   const [errorMsg, setErrorMsg] = useState('');
   const autoLoadDone = useRef(false);
 
+  console.log('App component rendering, status:', status, 'articles:', articles.length);
+
   async function handleFetch(inputUrl = url) {
     const trimmed = inputUrl.trim();
     if (!trimmed) {
