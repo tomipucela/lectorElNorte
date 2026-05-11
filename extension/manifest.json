@@ -1,0 +1,17 @@
+{
+  "manifest_version": 3,
+  "name": "Transformar El Norte",
+  "version": "1.0",
+  "description": "Muestra un popup 'TRANSFORMAR' en El Norte de Castilla y abre el lector del proyecto con la URL actual.",
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*.elnortedecastilla.es/*",
+        "*://elnortedecastilla.es/*"
+      ],
+      "js": ["content.js"],
+      "css": ["styles.css"]
+    }
+  ],
+  "host_permissions": ["*://*.elnortedecastilla.es/*", "*://elnortedecastilla.es/*"]
+}
