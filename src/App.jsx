@@ -246,11 +246,74 @@ export default function App() {
     // Priority: source (from extension) > url (manual)
     const urlToFetch = sourceUrl || incomingUrl;
 
-    if (!urlToFetch) return;
+    console.log('App: checking for auto-load. source=', sourceUrl, 'url=', incomingUrl, 'urlToFetch=', urlToFetch);
+
+    if (!urlToFetch) {
+      console.log('App: no URL to fetch, returning');
+      return;
+    }
 
     autoLoadDone.current = true;
     setUrl(urlToFetch);
-    void handleFetch(urlToFetch);
+    
+    // Execute fetch immediately with the URL
+    const executeAutoFetch = async () => {
+      try {
+        console.log('App: auto-fetching URL:', urlToFetch);
+        setStatus('loading');
+        setArticles([]);
+        setErrorMsg('');
+
+        const response = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url: urlToFetch })
+        });
+
+        if (!response.ok) {
+          const errData = await response.json();
+          throw new Error(errData.error || `HTTP ${response.status}`);
+        }
+
+        const data = await response.json();
+        const html = data.html;
+
+        if (!html) {
+          throw new Error('No se pudo descargar el contenido de la página');
+        }
+
+        const parser = new DOMParser();
+        const documentNode = parser.parseFromString(html, 'text/html');
+        const scripts = Array.from(documentNode.querySelectorAll('script[type="application/ld+json"]'));
+
+        const parsed = scripts
+          .map((script) => {
+            try {
+              return JSON.parse(script.textContent);
+            } catch {
+              return null;
+            }
+          })
+          .filter(Boolean)
+          .flatMap((item) => normalizeJsonLd(item));
+
+        if (!parsed.length) {
+          throw new Error('Los bloques JSON-LD no pudieron parsearse');
+        }
+
+        const ordered = parsed.sort((left, right) => JSON.stringify(right).length - JSON.stringify(left).length);
+        setArticles(ordered);
+        setStatus('done');
+        console.log('App: auto-fetch completed, found', ordered.length, 'articles');
+      } catch (error) {
+        const msg = error instanceof Error ? error.message : 'Error desconocido';
+        setErrorMsg(msg);
+        setStatus('error');
+        console.error('App: auto-fetch error:', msg);
+      }
+    };
+    
+    executeAutoFetch();
   }, []);
 
   return (
