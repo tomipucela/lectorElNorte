@@ -9,11 +9,15 @@
   },
   "permissions": ["tabs", "scripting", "activeTab"],
   "host_permissions": ["*://elnortedecastilla.es/*", "*://*.elnortedecastilla.es/*", "https://lector-el-norte-zw6m-rolsufg8j-tomipucelas-projects.vercel.app/*"],
+  "background": {
+    "service_worker": "background.js"
+  },
   "content_scripts": [
     {
       "matches": ["*://elnortedecastilla.es/*", "*://*.elnortedecastilla.es/*"],
       "js": ["content.js"],
-      "run_at": "document_idle"
+      "run_at": "document_start",
+      "all_frames": true
     }
   ]
 }
