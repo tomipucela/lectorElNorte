@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>JSON-LD News Transformer</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <main class="app">
+      <section class="hero">
+        <p class="eyebrow">Extensión</p>
+        <h1>Transformar noticia</h1>
+        <p class="subtitle">Pulsa para leer la pestaña activa y extraer el JSON-LD de la página sin hacer `fetch` a la web.</p>
+      </section>
+
+      <section class="controls">
+        <button id="transformBtn" type="button">Transformar</button>
+        <p id="status" class="status">Listo para usar.</p>
+      </section>
+
+      <section class="results">
+        <div id="meta" class="meta hidden"></div>
+        <div id="cards" class="cards"></div>
+        <pre id="raw" class="raw hidden"></pre>
+      </section>
+    </main>
+    <script src="popup.js"></script>
+  </body>
+  </html>

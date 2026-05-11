@@ -1,0 +1,19 @@
+{
+  "manifest_version": 3,
+  "name": "JSON-LD News Transformer",
+  "version": "1.0.0",
+  "description": "Extrae noticias estructuradas JSON-LD desde la pestaña activa.",
+  "action": {
+    "default_title": "Transformar noticia",
+    "default_popup": "popup.html"
+  },
+  "permissions": ["tabs", "scripting", "activeTab"],
+  "host_permissions": ["*://elnortedecastilla.es/*", "*://*.elnortedecastilla.es/*", "https://lector-el-norte-zw6m-rolsufg8j-tomipucelas-projects.vercel.app/*"],
+  "content_scripts": [
+    {
+      "matches": ["*://elnortedecastilla.es/*", "*://*.elnortedecastilla.es/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}

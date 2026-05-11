@@ -1,0 +1,20 @@
+{
+  "name": "jsonld-news-transformer",
+  "displayName": "JSON-LD News Transformer",
+  "description": "Extensión de VS Code para transformar una URL de noticia en JSON-LD estructurado.",
+  "version": "0.0.1",
+  "publisher": "tomip",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": ["Other"],
+  "main": "./extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "jsonldNewsTransformer.transform",
+        "title": "Transformar noticia JSON-LD"
+      }
+    ]
+  }
+}

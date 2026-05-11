@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 const API_URL = typeof window !== 'undefined' && window.location.hostname === 'localhost'
   ? 'http://localhost:3001/api/fetch'
@@ -175,9 +175,10 @@ export default function App() {
   const [status, setStatus] = useState('idle');
   const [articles, setArticles] = useState([]);
   const [errorMsg, setErrorMsg] = useState('');
+  const autoLoadDone = useRef(false);
 
-  async function handleFetch() {
-    const trimmed = url.trim();
+  async function handleFetch(inputUrl = url) {
+    const trimmed = inputUrl.trim();
     if (!trimmed) {
       setErrorMsg('Ingresa una URL válida');
       setStatus('error');
@@ -234,6 +235,19 @@ export default function App() {
       setStatus('error');
     }
   }
+
+  useEffect(() => {
+    if (autoLoadDone.current) return;
+
+    const params = new URLSearchParams(window.location.search);
+    const incomingUrl = params.get('url');
+
+    if (!incomingUrl) return;
+
+    autoLoadDone.current = true;
+    setUrl(incomingUrl);
+    void handleFetch(incomingUrl);
+  }, []);
 
   return (
     <main className="app-shell">
