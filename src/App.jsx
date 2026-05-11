@@ -1,6 +1,8 @@
 import { useState } from 'react';
 
-const API_URL = 'http://localhost:3001/api/fetch';
+const API_URL = typeof window !== 'undefined' && window.location.hostname === 'localhost'
+  ? 'http://localhost:3001/api/fetch'
+  : '/api/fetch';
 
 function formatDate(dateStr) {
   if (!dateStr) return null;
