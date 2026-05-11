@@ -240,13 +240,17 @@ export default function App() {
     if (autoLoadDone.current) return;
 
     const params = new URLSearchParams(window.location.search);
+    const sourceUrl = params.get('source');
     const incomingUrl = params.get('url');
 
-    if (!incomingUrl) return;
+    // Priority: source (from extension) > url (manual)
+    const urlToFetch = sourceUrl || incomingUrl;
+
+    if (!urlToFetch) return;
 
     autoLoadDone.current = true;
-    setUrl(incomingUrl);
-    void handleFetch(incomingUrl);
+    setUrl(urlToFetch);
+    void handleFetch(urlToFetch);
   }, []);
 
   return (
