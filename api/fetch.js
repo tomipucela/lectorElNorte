@@ -24,21 +24,31 @@ export default async function handler(req, res) {
   }
 
   try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 15000);
+
     const response = await fetch(url, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
       },
-      timeout: 15000
+      signal: controller.signal
     });
+
+    clearTimeout(timeout);
 
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}`);
     }
 
     const html = await response.text();
-    res.status(200).json({ html });
+    
+    if (!html || html.trim().length === 0) {
+      throw new Error('La respuesta está vacía');
+    }
+
+    return res.status(200).json({ html });
   } catch (error) {
     console.error('Error:', error.message);
-    res.status(500).json({ error: error.message || 'Error al descargar la página' });
+    return res.status(500).json({ error: error.message || 'Error al descargar la página' });
   }
 }

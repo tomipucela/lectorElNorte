@@ -29,8 +29,14 @@ function extractAuthors(author) {
 }
 
 function truncateBody(text, max = 99999) {
-  if (!text || text.length <= max) return text;
-  return `${text.slice(0, max).trim()}…`;
+  if (!text) return text;
+  const str = String(text);
+  // Eliminar puntos suspensivos
+  let processed = str.replace(/\.\.\./g, "");
+  // Convertir .Letra a .\nLetra
+  processed = processed.replace(/\.(?=[A-ZÁÉÍÓÚa-záéíóú0-9])/g, ".\n");
+  if (processed.length <= max) return processed;
+  return `${processed.slice(0, max).trim()}…`;
 }
 
 function normalizeJsonLd(payload) {
@@ -66,8 +72,6 @@ function Badge({ children, color = 'blue' }) {
 }
 
 function ArticleCard({ data }) {
-  const [showRaw, setShowRaw] = useState(false);
-
   const headline = data.headline || data.name || '(Sin titular)';
   const description = data.description;
   const body = data.articleBody;
@@ -157,14 +161,6 @@ function ArticleCard({ data }) {
               ))}
           </div>
         )}
-
-        <div className="raw-toggle-shell">
-          <button className="raw-toggle" type="button" onClick={() => setShowRaw((value) => !value)}>
-            <i className={`ti ti-${showRaw ? 'chevron-up' : 'chevron-down'}`} aria-hidden />
-            {showRaw ? 'Ocultar' : 'Ver'} JSON-LD completo
-          </button>
-          {showRaw && <pre className="raw-json">{JSON.stringify(data, null, 2)}</pre>}
-        </div>
       </div>
     </article>
   );
@@ -180,7 +176,7 @@ export default function App() {
   console.log('App component rendering, status:', status, 'articles:', articles.length);
 
   async function handleFetch(inputUrl = url) {
-    const trimmed = inputUrl.trim();
+    const trimmed = String(inputUrl || url).trim();
     if (!trimmed) {
       setErrorMsg('Ingresa una URL válida');
       setStatus('error');
@@ -198,15 +194,20 @@ export default function App() {
         body: JSON.stringify({ url: trimmed })
       });
 
-      if (!response.ok) {
-        const errData = await response.json();
-        throw new Error(errData.error || `HTTP ${response.status}`);
+      let data;
+      try {
+        data = await response.json();
+      } catch (parseError) {
+        throw new Error(`Respuesta inválida del servidor: ${parseError.message}`);
       }
 
-      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || `HTTP ${response.status}`);
+      }
+
       const html = data.html;
 
-      if (!html) {
+      if (!html || html.trim().length === 0) {
         throw new Error('No se pudo descargar el contenido de la página');
       }
 
@@ -229,7 +230,7 @@ export default function App() {
         throw new Error('Los bloques JSON-LD no pudieron parsearse');
       }
 
-      const ordered = parsed.sort((left, right) => JSON.stringify(right).length - JSON.stringify(left).length);
+      const ordered = parsed.slice(0, 1);
       setArticles(ordered);
       setStatus('done');
     } catch (error) {
@@ -272,15 +273,20 @@ export default function App() {
           body: JSON.stringify({ url: urlToFetch })
         });
 
-        if (!response.ok) {
-          const errData = await response.json();
-          throw new Error(errData.error || `HTTP ${response.status}`);
+        let data;
+        try {
+          data = await response.json();
+        } catch (parseError) {
+          throw new Error(`Respuesta inválida del servidor: ${parseError.message}`);
         }
 
-        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data.error || `HTTP ${response.status}`);
+        }
+
         const html = data.html;
 
-        if (!html) {
+        if (!html || html.trim().length === 0) {
           throw new Error('No se pudo descargar el contenido de la página');
         }
 
@@ -303,7 +309,7 @@ export default function App() {
           throw new Error('Los bloques JSON-LD no pudieron parsearse');
         }
 
-        const ordered = parsed.sort((left, right) => JSON.stringify(right).length - JSON.stringify(left).length);
+        const ordered = parsed.slice(0, 1);
         setArticles(ordered);
         setStatus('done');
         console.log('App: auto-fetch completed, found', ordered.length, 'articles');
@@ -344,7 +350,7 @@ export default function App() {
             />
             <button
               onClick={handleFetch}
-              disabled={status === 'loading' || !url.trim()}
+              disabled={status === 'loading' || !String(url).trim()}
               style={{ padding: '0.95rem 1.2rem', fontSize: 14, display: 'flex', alignItems: 'center', gap: 6, borderRadius: '16px', border: 0, background: 'linear-gradient(180deg, var(--accent), var(--accent-strong))', color: 'white', fontWeight: 700, cursor: 'pointer' }}
             >
               {status === 'loading' ? (

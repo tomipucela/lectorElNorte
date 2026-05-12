@@ -124,7 +124,7 @@
       }
 
       // Open web app with source URL as parameter
-      const webUrl = 'https://lector-el-norte-v9vd.vercel.app';
+      const webUrl = 'https://lector-el-norte.vercel.app/';
       const sourceUrl = encodeURIComponent(location.href);
       const fullUrl = webUrl + '?source=' + sourceUrl;
       

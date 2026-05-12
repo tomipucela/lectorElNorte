@@ -15,12 +15,18 @@ function formatDate(dateStr) {
 function extractAuthors(author) {
   if (!author) return null;
   const arr = Array.isArray(author) ? author : [author];
-  return arr.map(a => (typeof a === "string" ? a : a.name)).filter(Boolean).join(", ");
+  return arr.map(a => {
+    if (typeof a === "string") return a;
+    if (a && a.name) return String(a.name);
+    return null;
+  }).filter(Boolean).join(", ") || null;
 }
 
 function truncateBody(text, max = 800) {
-  if (!text || text.length <= max) return text;
-  return text.slice(0, max).trim() + "…";
+  if (!text) return text;
+  const str = String(text);
+  if (str.length <= max) return str;
+  return str.slice(0, max).trim() + "…";
 }
 
 function Badge({ children, color = "blue" }) {
@@ -46,17 +52,15 @@ function Badge({ children, color = "blue" }) {
 }
 
 function ArticleCard({ data }) {
-  const [showRaw, setShowRaw] = useState(false);
-
-  const headline = data.headline || data.name || "(Sin titular)";
-  const description = data.description;
-  const body = data.articleBody;
+  const headline = String(data.headline || data.name || "(Sin titular)");
+  const description = data.description ? String(data.description) : null;
+  const body = data.articleBody ? String(data.articleBody) : null;
   const image = data.image?.url || (typeof data.image === "string" ? data.image : null);
   const authors = extractAuthors(data.author);
   const published = formatDate(data.datePublished);
   const modified = formatDate(data.dateModified);
-  const section = data.articleSection;
-  const publisher = data.publisher?.name;
+  const section = data.articleSection ? String(data.articleSection) : null;
+  const publisher = data.publisher?.name ? String(data.publisher.name) : null;
   const keywords = data.keywords;
   const type = data["@type"];
   const url = data.url || data.mainEntityOfPage?.["@id"];
@@ -163,13 +167,13 @@ function ArticleCard({ data }) {
               whiteSpace: "pre-wrap",
             }}>
               {(() => {
-                let text = body
+                let text = String(body)
                   .replace(/\.\.\./g, "")
                   .replace(/\.(?=[A-ZÁÉÍÓÚa-záéíóú0-9])/g, ".\n");
                 return truncateBody(text);
               })()}
             </p>
-            {body.length > 800 && (
+            {body && String(body).length > 800 && (
               <p style={{ fontSize: 13, color: "var(--color-text-tertiary)", marginTop: 8 }}>
                 … texto completo disponible en el original
               </p>
@@ -179,7 +183,7 @@ function ArticleCard({ data }) {
 
         {keywords && (
           <div style={{ marginTop: "1.25rem", display: "flex", flexWrap: "wrap", gap: 6 }}>
-            {(Array.isArray(keywords) ? keywords : keywords.split(",")).slice(0, 8).map((kw, i) => (
+            {(Array.isArray(keywords) ? keywords : String(keywords).split(",")).slice(0, 8).map((kw, i) => (
               <span key={i} style={{
                 fontSize: 11,
                 padding: "3px 10px",
@@ -187,36 +191,10 @@ function ArticleCard({ data }) {
                 color: "var(--color-text-secondary)",
                 borderRadius: 20,
                 border: "0.5px solid var(--color-border-tertiary)",
-              }}>#{kw.trim()}</span>
+              }}>#{String(kw).trim()}</span>
             ))}
           </div>
         )}
-
-        <div style={{ marginTop: "1.25rem", borderTop: "0.5px solid var(--color-border-tertiary)", paddingTop: 12 }}>
-          <button
-            onClick={() => setShowRaw(v => !v)}
-            style={{ fontSize: 12, color: "var(--color-text-secondary)", background: "none", border: "none", cursor: "pointer", padding: 0, display: "flex", alignItems: "center", gap: 5 }}
-          >
-            <i className={`ti ti-${showRaw ? "chevron-up" : "chevron-down"}`} aria-hidden style={{ fontSize: 13 }} />
-            {showRaw ? "Ocultar" : "Ver"} JSON-LD completo
-          </button>
-          {showRaw && (
-            <pre style={{
-              marginTop: 10,
-              padding: "1rem",
-              background: "var(--color-background-secondary)",
-              borderRadius: "var(--border-radius-md)",
-              fontSize: 11,
-              color: "var(--color-text-secondary)",
-              overflowX: "auto",
-              whiteSpace: "pre-wrap",
-              wordBreak: "break-all",
-              border: "0.5px solid var(--color-border-tertiary)",
-            }}>
-              {JSON.stringify(data, null, 2)}
-            </pre>
-          )}
-        </div>
       </div>
     </div>
   );
@@ -229,7 +207,7 @@ export default function App() {
   const [errorMsg, setErrorMsg] = useState("");
 
   async function handleFetch() {
-    const trimmed = url.trim();
+    const trimmed = String(url).trim();
     if (!trimmed) return;
     setStatus("loading");
     setArticles([]);
