@@ -124,7 +124,7 @@
       }
 
       // Open web app with source URL as parameter
-      const webUrl = 'https://lector-el-norte-zw6m-rolsufg8j-tomipucelas-projects.vercel.app';
+      const webUrl = 'https://lector-el-norte-v9vd.vercel.app';
       const sourceUrl = encodeURIComponent(location.href);
       const fullUrl = webUrl + '?source=' + sourceUrl;
       

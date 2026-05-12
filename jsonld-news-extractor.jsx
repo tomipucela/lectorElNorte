@@ -18,7 +18,17 @@ function extractAuthors(author) {
   return arr.map(a => (typeof a === "string" ? a : a.name)).filter(Boolean).join(", ");
 }
 
+function processArticleText(text) {
+  if (!text) return text;
+  // Eliminar puntos suspensivos (...)
+  text = text.replace(/\.\.\./g, "");
+  // Convertir punto sin espacio siguiente a newline (ej. "palabra.Otra" -> "palabra.\nOtra")
+  text = text.replace(/\.(?=[A-ZÁÉÍÓÚa-záéíóú0-9])/g, ".\n");
+  return text;
+}
+
 function truncateBody(text, max = 800) {
+  text = processArticleText(text);
   if (!text || text.length <= max) return text;
   return text.slice(0, max).trim() + "…";
 }
@@ -248,7 +258,7 @@ export default function App() {
 
       if (!parsed.length) throw new Error("Los bloques JSON-LD no pudieron parsearse");
 
-      const largest = parsed.sort((a, b) => JSON.stringify(b).length - JSON.stringify(a).length);
+      const largest = parsed.slice(0, 1);
       setArticles(largest);
       setStatus("done");
     } catch (e) {
@@ -305,12 +315,6 @@ export default function App() {
 
       {status === "done" && articles.length > 0 && (
         <>
-          {articles.length > 1 && (
-            <p style={{ fontSize: 13, color: "var(--color-text-secondary)", marginBottom: "1rem" }}>
-              <i className="ti ti-layers" aria-hidden style={{ marginRight: 5, verticalAlign: -2 }} />
-              Se encontraron {articles.length} bloques JSON-LD — ordenados de mayor a menor tamaño
-            </p>
-          )}
           {articles.map((a, i) => <ArticleCard key={i} data={a} />)}
         </>
       )}
