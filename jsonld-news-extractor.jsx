@@ -18,17 +18,7 @@ function extractAuthors(author) {
   return arr.map(a => (typeof a === "string" ? a : a.name)).filter(Boolean).join(", ");
 }
 
-function processArticleText(text) {
-  if (!text) return text;
-  // Eliminar puntos suspensivos (...)
-  text = text.replace(/\.\.\./g, "");
-  // Convertir punto sin espacio siguiente a newline (ej. "palabra.Otra" -> "palabra.\nOtra")
-  text = text.replace(/\.(?=[A-ZÁÉÍÓÚa-záéíóú0-9])/g, ".\n");
-  return text;
-}
-
 function truncateBody(text, max = 800) {
-  text = processArticleText(text);
   if (!text || text.length <= max) return text;
   return text.slice(0, max).trim() + "…";
 }
@@ -171,7 +161,14 @@ function ArticleCard({ data }) {
               color: "var(--color-text-primary)",
               margin: 0,
               whiteSpace: "pre-wrap",
-            }}>{truncateBody(body)}</p>
+            }}>
+              {(() => {
+                let text = body
+                  .replace(/\.\.\./g, "")
+                  .replace(/\.(?=[A-ZÁÉÍÓÚa-záéíóú0-9])/g, ".\n");
+                return truncateBody(text);
+              })()}
+            </p>
             {body.length > 800 && (
               <p style={{ fontSize: 13, color: "var(--color-text-tertiary)", marginTop: 8 }}>
                 … texto completo disponible en el original
