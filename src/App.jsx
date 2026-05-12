@@ -33,8 +33,8 @@ function truncateBody(text, max = 99999) {
   const str = String(text);
   // Eliminar puntos suspensivos
   let processed = str.replace(/\.\.\./g, "");
-  // Convertir .Letra a .\nLetra
-  processed = processed.replace(/\.(?=[A-ZÁÉÍÓÚa-záéíóú0-9])/g, ".\n");
+  // Convertir .MAYÚSCULA a .\nMAYÚSCULA (solo si es mayúscula, no números ni minúsculas)
+  processed = processed.replace(/\.(?=[A-ZÁÉÍÓÚ])/g, ".\n");
   if (processed.length <= max) return processed;
   return `${processed.slice(0, max).trim()}…`;
 }
